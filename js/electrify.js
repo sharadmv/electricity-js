@@ -80,7 +80,9 @@ var interface = {
     powerstrips[id].toggle();
   },
   state : function(id) {
-    return powerstrips[id].state;
+    if (powerstrips[id]) {
+      return powerstrips[id].state;
+    }
   },
   tx : function(id) {
     powerstrips[id].tx();

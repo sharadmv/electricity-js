@@ -23,6 +23,7 @@ bridge.joinChannel("electrify-channel", channelHandler, true, function(c) {;
 bridge.publishService("electrify", electricity);
 
 app.use(express.bodyParser());
+app.use(express.static('../web/'));
 app.get('/api', function(req, res) {
   var res = router.wrap(res);
   res.json(Object.keys(filters));
@@ -53,7 +54,9 @@ app.post('/api/:id', function(req, res) {
   }
 });
 electricity.onData(function(id, data) {
-  channel.broadcast(id, data, electricity.state(id), (new Date()).getTime());
+  if (channel) {
+    channel.broadcast(id, data, electricity.state(id), (new Date()).getTime());
+  }
 });
 sound.clap(function() {
 //  console.log("CLAP");
