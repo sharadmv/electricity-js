@@ -37,7 +37,7 @@ $(document).ready () ->
   bridge.getService "electrify-service", (e) ->
     e.subscribe({ 
       broadcast: (id, data, state) ->
-        d id, data, state
+        #d id, data, state
         for device in gDevices
           if device.remoteId == parseInt(id)
             if state isnt device.state
@@ -131,7 +131,7 @@ createFloor = () ->
 
 createDevices = () ->
     circleInfo = [
-      [[110, 300], 1, "Light"]
+      [[110, 300], 1, "Lamp"]
       [[300, 200], 2, "Refrigerator"]
       [[480, 310], 3, "Speakers"]
     ]
@@ -141,12 +141,14 @@ createDevices = () ->
       
 class Device
   
-  RADIUS:20
-  
+  RADIUS    :     10
+  ON_COLOR  :     "#DDD" 
+  OFF_COLOR :     "#001e5d"
+    
   constructor: (@name, @coords, @remoteId) ->
-    circle = new paper.Path.Circle @coords, 10
-    circle.strokeColor = "blue"
-    circle.fillColor = "blue"
+    circle = new paper.Path.Circle @coords, @RADIUS
+    circle.strokeColor = @OFF_COLOR
+    circle.fillColor = @OFF_COLOR
     circle.name = @name
         
     @originalRadius = circle.bounds.width / 2
@@ -188,10 +190,10 @@ class Device
     @ui.strokeColor = "blue"
     
   updateState: () ->
-    if @state
-      @ui.fillColor = "#001e5d"
+    if not @state
+      @ui.fillColor = @ON_COLOR
     else
-      @ui.fillColor = "#DDD"
+      @ui.fillColor = @OFF_COLOR
       
   
 selectDevice = (device) ->

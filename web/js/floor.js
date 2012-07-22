@@ -45,7 +45,6 @@
       return e.subscribe({
         broadcast: function(id, data, state) {
           var device, _i, _len, _results;
-          d(id, data, state);
           _results = [];
           for (_i = 0, _len = gDevices.length; _i < _len; _i++) {
             device = gDevices[_i];
@@ -199,7 +198,7 @@
 
   createDevices = function() {
     var circleInfo, info;
-    circleInfo = [[[110, 300], 1, "Light"], [[300, 200], 2, "Refrigerator"], [[480, 310], 3, "Speakers"]];
+    circleInfo = [[[110, 300], 1, "Lamp"], [[300, 200], 2, "Refrigerator"], [[480, 310], 3, "Speakers"]];
     return window.gDevices = (function() {
       var _i, _len, _results;
       _results = [];
@@ -213,16 +212,20 @@
 
   Device = (function() {
 
-    Device.prototype.RADIUS = 20;
+    Device.prototype.RADIUS = 10;
+
+    Device.prototype.ON_COLOR = "#DDD";
+
+    Device.prototype.OFF_COLOR = "#001e5d";
 
     function Device(name, coords, remoteId) {
       var circle;
       this.name = name;
       this.coords = coords;
       this.remoteId = remoteId;
-      circle = new paper.Path.Circle(this.coords, 10);
-      circle.strokeColor = "blue";
-      circle.fillColor = "blue";
+      circle = new paper.Path.Circle(this.coords, this.RADIUS);
+      circle.strokeColor = this.OFF_COLOR;
+      circle.fillColor = this.OFF_COLOR;
       circle.name = this.name;
       this.originalRadius = circle.bounds.width / 2;
       this.ui = circle;
@@ -266,10 +269,10 @@
     };
 
     Device.prototype.updateState = function() {
-      if (this.state) {
-        return this.ui.fillColor = "#001e5d";
+      if (!this.state) {
+        return this.ui.fillColor = this.ON_COLOR;
       } else {
-        return this.ui.fillColor = "#DDD";
+        return this.ui.fillColor = this.OFF_COLOR;
       }
     };
 
