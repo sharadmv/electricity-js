@@ -41,9 +41,6 @@ createHtml = () ->
   htmlStr = thermos.render ->
 	  @h1 'Electrify.js'
 	  @div "#content", ->
-	    @div {'class' : 'btn-group'}, ->
-        @button {'class' : 'btn custom-nav'}, 'Dashboard'
-        @button {'class' : 'btn custom-nav'}, 'Floor'
 	   @div '#bottom-panel', ->
 	     @span '#name-label', 'Mac'
 	     @span '#id-label', '5'

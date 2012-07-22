@@ -59,52 +59,42 @@
     var htmlStr;
     htmlStr = thermos.render(function() {
       this.h1('Electrify.js');
-      this.div("#content", function() {
-        return this.div({
-          'class': 'btn-group'
-        }, function() {
-          this.button({
-            'class': 'btn custom-nav'
-          }, 'Dashboard');
-          return this.button({
-            'class': 'btn custom-nav'
-          }, 'Floor');
+      return this.div("#content", function() {
+        this.div('#bottom-panel', function() {
+          this.span('#name-label', 'Mac');
+          this.span('#id-label', '5');
+          this.span('#state-label', 'ON');
+          this.input({
+            'type': 'button',
+            'value': 'toggle',
+            'id': 'toggle-btn'
+          });
+          this.img({
+            'id': 'detail-img',
+            'src': 'images/lamp.png'
+          });
+          this.input({
+            'type': 'text',
+            'value': '12',
+            'id': 'time-val'
+          });
+          this.span('seconds');
+          this.input({
+            'type': 'button',
+            'value': 'Schedule',
+            'id': 'schedule-btn'
+          });
+          this.input({
+            'type': 'checkbox',
+            'value': 'Repeat',
+            'id': 'repeat-btn'
+          });
+          return this.span('Repeat');
         });
-      });
-      this.div('#bottom-panel', function() {
-        this.span('#name-label', 'Mac');
-        this.span('#id-label', '5');
-        this.span('#state-label', 'ON');
-        this.input({
-          'type': 'button',
-          'value': 'toggle',
-          'id': 'toggle-btn'
+        return this.canvas({
+          'id': 'floor-plan',
+          'resize': ''
         });
-        this.img({
-          'id': 'detail-img',
-          'src': 'images/lamp.png'
-        });
-        this.input({
-          'type': 'text',
-          'value': '12',
-          'id': 'time-val'
-        });
-        this.span('seconds');
-        this.input({
-          'type': 'button',
-          'value': 'Schedule',
-          'id': 'schedule-btn'
-        });
-        this.input({
-          'type': 'checkbox',
-          'value': 'Repeat',
-          'id': 'repeat-btn'
-        });
-        return this.span('Repeat');
-      });
-      return this.canvas({
-        'id': 'floor-plan',
-        'resize': ''
       });
     });
     $('#main').html(htmlStr);
