@@ -1,4 +1,6 @@
 
+SERVER_IP = "192.168.1.179:8080"
+
 $(document).ready () ->
   # Do the floor plans
   {Path, Rectangle} = paper
@@ -16,7 +18,7 @@ $(document).ready () ->
   createDevices()
   setupMouseDownEvents()
   paper.view.draw()
-  canvas.width = 700
+  canvas.width = 620
   canvas.height = 500
     
   paper.view.onFrame = ->
@@ -38,15 +40,15 @@ $(document).ready () ->
         d id, data, state
         for device in gDevices
           if device.remoteId == parseInt(id)
+            if state isnt device.state
+              device.updateState()
             device.state = state
     })
-
-SERVER_IP = "192.168.1.179:8080"
+    
 createHtml = () ->
   
   # HTML
   htmlStr = thermos.render ->
-    @h1 'Electrify.js'
     @div "#content", ->
       @div '#bottom-panel', ->
         @span '#name-label', 'Mac'
@@ -182,6 +184,12 @@ class Device
   
   deselect: () ->
     @ui.strokeColor = "blue"
+    
+  updateState: () ->
+    if @state
+      @ui.fillColor = "grey"
+    else
+      @ui.fillColor = "green"
       
   
 selectDevice = (device) ->

@@ -3,6 +3,8 @@
   var Device, SERVER_IP, createDevices, createFloor, createHtml, d, selectDevice, setupMouseDownEvents,
     __slice = [].slice;
 
+  SERVER_IP = "192.168.1.179:8080";
+
   $(document).ready(function() {
     var Path, Rectangle, bridge, canvas;
     Path = paper.Path, Rectangle = paper.Rectangle;
@@ -16,7 +18,7 @@
     createDevices();
     setupMouseDownEvents();
     paper.view.draw();
-    canvas.width = 700;
+    canvas.width = 620;
     canvas.height = 500;
     paper.view.onFrame = function() {
       var device, _i, _len, _results;
@@ -48,6 +50,9 @@
           for (_i = 0, _len = gDevices.length; _i < _len; _i++) {
             device = gDevices[_i];
             if (device.remoteId === parseInt(id)) {
+              if (state !== device.state) {
+                device.updateState();
+              }
               _results.push(device.state = state);
             } else {
               _results.push(void 0);
@@ -59,12 +64,9 @@
     });
   });
 
-  SERVER_IP = "192.168.1.179:8080";
-
   createHtml = function() {
     var htmlStr;
     htmlStr = thermos.render(function() {
-      this.h1('Electrify.js');
       return this.div("#content", function() {
         this.div('#bottom-panel', function() {
           this.span('#name-label', 'Mac');
@@ -258,6 +260,14 @@
 
     Device.prototype.deselect = function() {
       return this.ui.strokeColor = "blue";
+    };
+
+    Device.prototype.updateState = function() {
+      if (this.state) {
+        return this.ui.fillColor = "grey";
+      } else {
+        return this.ui.fillColor = "green";
+      }
     };
 
     return Device;
