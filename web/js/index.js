@@ -5,35 +5,36 @@ $(function() {
   });
   bridge.connect();
 
-  var numPoints = 0;
-  var watts = [0, 0];
+  var numPoints = [0, 0, 0];
+  var watts = [0, 0, 0];
+  var idToSeries = {
+    "1": 0,
+    "2": 1,
+    "3": 2
+  }
+
   bridge.getService("electrify-service", function(e) {
     e.subscribe({ 
-      broadcast: function(id, data, state) {
-        var seriesNum; 
-        if (id == "1") {
-          seriesNum = 0;
-          watts[0] = data;
-          updateCost();
-        }
-        if(id == "2") {
-          seriesNum = 1;
-          watts[1] = data;
-          updateCost();
-        }
-        if(id == "3") {
-          seriesNum = 2;
-          watts[2] = data;
-          updateCost();
-        }
-        if( data == null) {
+      broadcast: function(id, data, state, timestamp) {
+        if (!idToSeries.hasOwnProperty(id)) {
+          console.log("Unexpected id: " + id);
           return;
         }
+        if (data == null) {
+          console.log("Data is null");
+          return;
+        }
+        var seriesNum = idToSeries[id]; 
+        watts[seriesNum] = data;
+        if (watts[seriesNum] < 0) {
+          watts[seriesNum] = 0;
+        }
+        updateCost();
+        numPoints[seriesNum]++;
         console.log(data);
-        console.log("Id: " + id + " Data: " + data + " State: " + state);
+        console.log("Id: " + id + " Data: " + data + " State: " + state + " Timestamp: " + timestamp);
         var x = new Date().getTime();
-        numPoints++;
-        realTimeChart.series[seriesNum].addPoint([x, data], true, numPoints>10);
+        realTimeChart.series[seriesNum].addPoint([timestamp, data], true, numPoints[seriesNum] > 14);
       }
     });
   });
@@ -46,11 +47,11 @@ $(function() {
 
   var CHART_WIDTH = 450;
   var CHART_HEIGHT = 325;
-  var COST_PER_WATT_SECOND = 0.0000000416666667;
+  var COST_PER_WATT_PER_HOUR = 0.00015;
 
   function updateCost() {
-    var cost = (watts[0] + watts[1]) * COST_PER_WATT_SECOND;
-    $("#cost").html(cost);
+    var cost = (watts[0] + watts[1] + watts[2]) * COST_PER_WATT_PER_HOUR;
+    $("#cost").html(cost.toFixed(4));
   }
 
   var DEFAULT_SERIES = {
