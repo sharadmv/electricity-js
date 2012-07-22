@@ -5,8 +5,10 @@ $(function() {
   });
   bridge.connect();
 
-  var numPoints = [0, 0, 0];
+  numPoints = [0, 0, 0];
   var watts = [0, 0, 0];
+  lastPoint = [];
+  var cost = 0;
   var idToSeries = {
     "1": 0,
     "2": 1,
@@ -14,15 +16,20 @@ $(function() {
   }
 
   bridge.getService("electrify-service", function(e) {
+    setInterval(pushRealTimePoints, 2000);
     e.subscribe({ 
       broadcast: function(id, data, state, timestamp) {
+        //console.log("Id: " + id + " Data: " + data + " State: " + state + " Timestamp: " + timestamp);
         if (!idToSeries.hasOwnProperty(id)) {
           console.log("Unexpected id: " + id);
           return;
         }
         if (data == null) {
           console.log("Data is null");
-          return;
+          data = 0;
+        }
+        if (!state) {
+          data = 0;
         }
         var seriesNum = idToSeries[id]; 
         watts[seriesNum] = data;
@@ -31,13 +38,17 @@ $(function() {
         }
         updateCost();
         numPoints[seriesNum]++;
-        console.log(data);
-        console.log("Id: " + id + " Data: " + data + " State: " + state + " Timestamp: " + timestamp);
         var x = new Date().getTime();
-        realTimeChart.series[seriesNum].addPoint([timestamp, data], true, numPoints[seriesNum] > 14);
+        var shouldCutOff = numPoints[seriesNum] > 14;
+        if (seriesNum == 2 && numPoints[seriesNum] < 40) {
+          shouldCutOff = false;
+        }
+        lastPoint[seriesNum] = [timestamp, data];
       }
     });
   });
+
+  
 
   Highcharts.setOptions({
     global: {
@@ -50,17 +61,36 @@ $(function() {
   var COST_PER_WATT_PER_HOUR = 0.00015;
 
   function updateCost() {
-    var cost = (watts[0] + watts[1] + watts[2]) * COST_PER_WATT_PER_HOUR;
+    cost = (watts[0] + watts[1] + watts[2]) * COST_PER_WATT_PER_HOUR;
     $("#cost").html(cost.toFixed(4));
   }
+
+  var pointsCount = 0;
+
+  function pushRealTimePoints() {
+    pointsCount++;
+    for(var i = 0; i < 3; i++) {
+      realTimeChart.series[i].addPoint(lastPoint[i], true, pointsCount>20);
+    }
+  }
+
+  setInterval(updateSpent, 1000);
+
+  var spent = 0;
+  function updateSpent() {
+    spent += cost / 60 / 60;
+    console.log(cost);
+    $("#spent").html(spent.toFixed(6));
+  }
+
 
   var DEFAULT_SERIES = {
     usage: {
       daily: {
         axis: ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'],
         data: [
-          [1, 2, 3, 4, 5, 6, 7],
-          [2, 3, 4, 5, 1, 3, 2]
+          [3, 4, 5, 5, 4, 4, 5],
+          [2, 3, 4, 5, 2, 4, 4]
         ]
       },
       hourly: {
@@ -112,13 +142,18 @@ $(function() {
   realTimeChart = new Highcharts.Chart({
     chart: {
       renderTo: 'real-time-chart',
-      type: 'spline',
+      type: 'areaspline',
       width: 930,
       height: 275,
       borderWidth: 1
     },
     title: {
       text: 'Real Time Energy Consumption'
+    },
+    plotOptions: {
+      areaspline: {
+        fillOpacity: 0.5
+      }
     },
     xAxis: {
       type: 'datetime',
@@ -208,56 +243,88 @@ $(function() {
   costChart = new Highcharts.Chart({
     chart: {
       renderTo: 'cost-chart',
-      type: 'pie',
       width: CHART_WIDTH,
       height: CHART_HEIGHT,
-      borderWidth: 1
+      borderWidth: 1,
+      type: 'column'
     },
     title: {
-      text: 'Energy Consumption'
+      text: 'Cost By Device'
     },
     xAxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
+      categories: ['7/17', '7/18', '7/19', '7/20', '7/21']
     }, 
     yAxis: {
+      min: 0,
       title: {
         text: 'Energy usage'
+      },
+      stackLabels: {
+        enabled: true,
+        style: {
+          fontWeight: 'bold',
+        }
+      }
+    },
+    tooltip: {
+      formatter: function() {
+        return '<b>' + this.x + '</b><br/>' +
+          this.series.name + ': ' + this.y + '<br/>' + 
+          'Total: ' + this.point.stackTotal;
+      }
+    },
+    plotOptions: {
+      column: {
+        stacking: 'normal',
+        dataLabels: {
+          enabled: true,
+          color: 'white'
+        }
       }
     },
     series: [{
-      name: 'You',
-      data: [4, 6, 7, 8, 1]
+      name: 'Speaker',
+      data: [3, 4, 6, 1, 3]
     }, {
-      name: 'Others',
-      data: [1, 2, 3, 4, 5]
+      name: 'Lamp',
+      data: [4, 5, 1, 3, 2]
+    }, {
+      name: 'Toaster',
+      data: [1, 2, 1, 2, 1]
     }]
   });
 
   plantChart = new Highcharts.Chart({
     chart: {
       renderTo: 'plant-chart',
-      type: 'pie',
+      type: 'bar',
       width: CHART_WIDTH,
       height: CHART_HEIGHT,
       borderWidth: 1
     },
     title: {
-      text: 'Energy Consumption'
+      text: 'Breakdown of Cost Sources'
     },
     xAxis: {
-      categories: ['Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
+      categories: ['12pm', '1am', '2am', '3am', '4am', '5am']
     }, 
     yAxis: {
+      min: 0,
       title: {
         text: 'Energy usage'
       }
     },
+    plotOptions: {
+      series: {
+        stacking: 'normal'
+      }
+    },
     series: [{
-      name: 'You',
-      data: [4, 6, 7, 8, 1]
+      name: 'Renewable',
+      data: [.5, .7, .4, .6, .4, .5]
     }, {
-      name: 'Others',
-      data: [1, 2, 3, 4, 5]
+      name: 'Non-Renewable',
+      data: [4, 5, 3, 6, 4, 5]
     }]
   });
 });
