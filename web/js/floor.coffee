@@ -2,6 +2,10 @@
 $(document).ready () ->
   # Do the floor plans
   {Path, Rectangle} = paper
+  
+  # Globals
+  window.gDevices = []
+  window.gCurrDevice = null
     
   createHtml()
   canvas = document.getElementById 'floor-plan'
@@ -10,29 +14,76 @@ $(document).ready () ->
   createDevices()
   setupMouseDownEvents()
   paper.view.draw()
-  
+  paper.view.onFrame = ->
+    for device in gDevices
+      if device.state
+        device.onFrame()
+        
+  # Select the first device
+  selectDevice gDevices[0]
+
+  # Bridge setup
+  bridge = new Bridge {apiKey: "245b536642b8bbe7"}
+  bridge.connect()
+  bridge.getService "electrify-service", (e) ->
+    e.subscribe({ 
+      broadcast: (id, data, state) ->
+        d id, data, state
+        for device in gDevices
+          if device.remoteId == parseInt(id)
+            device.state = state
+    })
+
+SERVER_IP = "192.168.1.179:8080"
 createHtml = () ->
   
   # HTML
   htmlStr = thermos.render ->
-	  @h1 'Electricity.js'
+	  @h1 'Electrify.js'
 	  @div "#content", ->
-	   #@h2 'floor plan'
+	    @div {'class' : 'btn-group'}, ->
+        @button {'class' : 'btn custom-nav'}, 'Dashboard'
+        @button {'class' : 'btn custom-nav'}, 'Floor'
 	   @div '#bottom-panel', ->
-	     @span '#id-label', '5'
 	     @span '#name-label', 'Mac'
-	     @span '#type-label', 'Computer' 
+	     @span '#id-label', '5'
+	     @span '#state-label', 'ON' 
 	     @input {'type' : 'button', 'value': 'toggle', 'id' : 'toggle-btn'}
+	     @img {'id': 'detail-img', 'src' : 'images/lamp.png'}
+	     
+	     @input {'type' : 'text', 'value' : '12', 'id' : 'time-val'}
+	     @span 'seconds'
+	     @input {'type' : 'button', 'value' : 'Schedule', 'id' : 'schedule-btn'}
+	     @input {'type' : 'checkbox', 'value' : 'Repeat', 'id' : 'repeat-btn'}
+	     @span 'Repeat'
+	     
 	   @canvas {'id': 'floor-plan', 'resize' : ''}      
   $('#main').html(htmlStr)
   
   # Events
   
-  $('#toggle-btn').click () ->
-    #alert 'clicked! ' + window.gCurrId
-    $.post 'http://192.168.1.179:8080/api/1', {'method':'toggle'}, (data) ->
-      console.log 'crap'
-      console.log data
+  $('#toggle-btn').click ->
+    d gCurrDevice.remoteId
+    if gCurrDevice
+      $.post 'http://' + SERVER_IP + '/api/' + gCurrDevice.remoteId, {'method':'toggle'}, (data) ->
+        console.log 'crap'
+        console.log data
+        
+  $('#schedule-btn').click ->
+    d parseInt($('#time-val').val())
+    if $('#repeat-btn').attr('checked') then repeat = yes else repeat = no
+    
+    timeoutFn = () ->
+      $.post 'http://' + SERVER_IP + '/api/' + gCurrDevice.remoteId, {'method':'toggle'}, (data) ->
+    
+    time = parseInt($('#time-val').val()) * 1000
+    d repeat
+    if repeat
+      setInterval timeoutFn, time
+    else
+      setTimeout timeoutFn, time
+      
+
   
 createFloor = () ->
   myPath = new paper.Path()
@@ -64,36 +115,60 @@ createFloor = () ->
   room4.strokeColor = 'black'
 
 createDevices = () ->
-    circles = [
-      [200, 300]
-      [400, 200]
-      [700, 340]
+    circleInfo = [
+      [[110, 300], 1, "Light"]
+      [[300, 200], 2, "Toaster"]
+      [[700, 310], 3, "Speakers"]
     ]
+    
+    window.gDevices = (new Device(info[2], info[0], info[1]) for info in circleInfo)
 
-    for circle in circles
-      aCircle = new paper.Path.Circle(circle, 20)
-      aCircle.strokeColor = "blue"
-      aCircle.fillColor = "blue"
-      aCircle.name = "circle"
-      console.log aCircle._id
-
-
-      i = 0
-
-      originalRadius = (aCircle.bounds.width / 2)
-      scale = 1.01
-
-      do (aCircle) ->
-        paper.view.onFrame = () ->
-          radius = (aCircle.bounds.width / 2)
-          if (radius / originalRadius) > 2 then scale = 0.99
-          if (radius / originalRadius) < 1 then scale = 1.01
-          #path.fillColor.hue += 1;
-          # Numbers, icons
-          aCircle.scale scale
-
-      #test aCircle, originalRadius
+      
+class Device
   
+  RADIUS:20
+  
+  constructor: (@name, @coords, @remoteId) ->
+    circle = new paper.Path.Circle @coords, 10
+    circle.strokeColor = "blue"
+    circle.fillColor = "blue"
+    circle.name = @name
+        
+    @originalRadius = circle.bounds.width / 2
+    @ui = circle
+    @scale = 1.01
+    @state = false
+    
+  onFrame: () ->
+    radius = @ui.bounds.width / 2
+    if (radius / @originalRadius) > 2 then @scale = 0.99
+    if (radius / @originalRadius) < 1 then @scale = 1.01
+    #path.fillColor.hue += 1;
+    # Numbers, icons
+    @ui.scale @scale
+    
+  updateDetailPanel: () ->
+    $('#id-label').text 'ID: ' + @remoteId
+    $('#name-label').text @name
+    $('#type-label').text 'Computer'
+    $('#state-label').text (if @state then 'ON' else 'OFF')
+    $('#detail-img').attr 'src', 'images/' + @name.toLowerCase() + '.png'
+    
+  select: () ->
+    @ui.strokeColor = "black"
+    @ui.strokeWidth = 5
+  
+  deselect: () ->
+    @ui.strokeColor = "blue"
+      
+  
+selectDevice = (device) ->
+  device.updateDetailPanel()
+  if window.gCurrDevice
+    window.gCurrDevice.deselect()
+  window.gCurrDevice = device
+  device.select()
+      
 setupMouseDownEvents = () ->
   hitOptions =
     segments: true
@@ -104,10 +179,13 @@ setupMouseDownEvents = () ->
   hitTool = new paper.Tool()
   hitTool.activate()
   hitTool.onMouseDown = (event) ->
-    console.log 'mouse down'
     hitResult = paper.project.hitTest event.point, hitOptions
     if hitResult
-      path = hitResult.item
-      console.log path._id
-      $('#bottom-panel-id').text(path._id)
-      window.gCurrId = path._id
+      for device in gDevices
+        if hitResult.item._id is device.ui._id
+          selectDevice device
+          
+
+# Debugging
+d = (args...) ->
+  console.log.apply console, args
