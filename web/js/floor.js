@@ -53,6 +53,9 @@
               if (state !== device.state) {
                 device.updateState();
               }
+              if (gCurrDevice.remoteId === parseInt(id)) {
+                device.updateDetailPanel();
+              }
               _results.push(device.state = state);
             } else {
               _results.push(void 0);
@@ -196,7 +199,7 @@
 
   createDevices = function() {
     var circleInfo, info;
-    circleInfo = [[[110, 300], 1, "Light"], [[300, 200], 2, "Toaster"], [[480, 310], 3, "Speakers"]];
+    circleInfo = [[[110, 300], 1, "Light"], [[300, 200], 2, "Refrigerator"], [[480, 310], 3, "Speakers"]];
     return window.gDevices = (function() {
       var _i, _len, _results;
       _results = [];
@@ -246,9 +249,9 @@
       $('#state-label').text((this.state ? 'ON' : 'OFF'));
       d(this.state);
       if (this.state) {
-        $('#state-label').css('backgroundColor', 'green');
+        $('#state-label').css('backgroundColor', '#66FF66');
       } else {
-        $('#state-label').css('backgroundColor', '#CCC');
+        $('#state-label').css('backgroundColor', '#DDD');
       }
       return $('#detail-img').attr('src', 'images/' + this.name.toLowerCase() + '.png');
     };
@@ -264,9 +267,9 @@
 
     Device.prototype.updateState = function() {
       if (this.state) {
-        return this.ui.fillColor = "grey";
+        return this.ui.fillColor = "#001e5d";
       } else {
-        return this.ui.fillColor = "green";
+        return this.ui.fillColor = "#DDD";
       }
     };
 

@@ -42,6 +42,8 @@ $(document).ready () ->
           if device.remoteId == parseInt(id)
             if state isnt device.state
               device.updateState()
+            if gCurrDevice.remoteId == parseInt(id)
+              device.updateDetailPanel()
             device.state = state
     })
     
@@ -130,7 +132,7 @@ createFloor = () ->
 createDevices = () ->
     circleInfo = [
       [[110, 300], 1, "Light"]
-      [[300, 200], 2, "Toaster"]
+      [[300, 200], 2, "Refrigerator"]
       [[480, 310], 3, "Speakers"]
     ]
     
@@ -172,9 +174,9 @@ class Device
     
     d @state
     if @state
-      $('#state-label').css('backgroundColor', 'green')
+      $('#state-label').css('backgroundColor', '#66FF66')
     else
-      $('#state-label').css('backgroundColor', '#CCC')
+      $('#state-label').css('backgroundColor', '#DDD')
     
     $('#detail-img').attr 'src', 'images/' + @name.toLowerCase() + '.png'
     
@@ -187,9 +189,9 @@ class Device
     
   updateState: () ->
     if @state
-      @ui.fillColor = "grey"
+      @ui.fillColor = "#001e5d"
     else
-      @ui.fillColor = "green"
+      @ui.fillColor = "#DDD"
       
   
 selectDevice = (device) ->
