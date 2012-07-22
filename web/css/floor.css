@@ -1,0 +1,31 @@
+@import "http://fonts.googleapis.com/css?family=Dosis:300,400,700";
+
+@import "http://fonts.googleapis.com/css?family=Josefin+Sans:400,600";
+body {
+  background-color: white;
+  font-family: 'Josefin Sans', sans-serif;
+}
+h1 {
+  margin-top: 60px;
+  margin-bottom: 20px;
+  font-family: Dosis;
+  letter-spacing: 5px;
+}
+#floor-plan {
+  margin-left: 300px;
+}
+#bottom-panel {
+  border-top: 2px solid black;
+  border-bottom: 2px solid black;
+  margin-bottom: 50px;
+  padding: 10px;
+}
+#bottom-panel #id-indicator {
+  padding-right: 30px;
+}
+#bottom-panel #toggle-btn {
+  background: black;
+  border: 5px solid yellow;
+  color: white;
+  padding: 10px;
+}

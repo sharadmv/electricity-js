@@ -1,0 +1,16 @@
+{
+  "name": "cinnamon",
+  "version": "0.1",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "coffee-script": "1.1.x",
+  },
+  "scripts": {
+    "test": "mocha",
+    "prepublish": "coffee -o lib -c src/*.coffee"
+  },
+  "contributors": [
+    "Abi Raja <abii@stanford.edu>"
+  ]
+}
