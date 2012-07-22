@@ -8,37 +8,50 @@ body{
 }
 
 #main{
+    width: 960px;
+    margin: 0 auto;
   //margin-left: 40px;
 }
 
 h1{
-  margin-top: 60px;
+/*  margin-top: 60px;
   margin-bottom: 20px;
   font-family: Dosis;
-  letter-spacing: 5px;
+  letter-spacing: 5px;*/
 }
 
 #floor-plan{
-    margin-left: 300px;
+    //margin-left: 300px;
     //height: 400px;
+    //width: 500px;
+    //border: 1px solid black;
+    float:left;
 }
 
 #bottom-panel{
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
+    border-right: 2px solid black;
     margin-bottom: 50px;
     padding: 10px;
-    
-    #id-label{
-        padding-right: 10px;
-    }
+    width: 180px;
+    height: 100%;
+    margin-right: 50px;
+    float: left;
+    margin-left: 20px;
     
     #name-label{
         font-weight: bold;
-        font-size: 24px;
+        font-size: 28px;
         display: block;
         padding-bottom: 20px;
         padding-top: 10px;
+    }
+    
+    #id-label{
+        padding-right: 10px;
+        display:block;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        float: left;
     }
     
     #state-label{
@@ -47,6 +60,15 @@ h1{
         background: #CCC;
         padding: 5px;
         margin-right: 15px;
+        float: right;
+    }
+    
+    .state-on{
+       background: green;
+    }
+    
+    .state-off{
+        background: #CCC;
     }
     
     #toggle-btn{
@@ -58,6 +80,21 @@ h1{
     
     #detail-img{
         height: 100px;
+        margin: 40px 0px 20px 30px;
+    }
+    
+    #time-val{
+        width: 20px;
+        margin-right: 10px;
+    }
+    
+    #repeat-btn{
+        margin-right: 10px;
+    }
+    
+    #schedule-btn{
+        margin-top: 20px;
+        //float:right;
     }
     
 }

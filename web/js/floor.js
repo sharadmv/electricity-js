@@ -3,6 +3,8 @@
   var Device, SERVER_IP, createDevices, createFloor, createHtml, d, selectDevice, setupMouseDownEvents,
     __slice = [].slice;
 
+  SERVER_IP = "192.168.1.179:8080";
+
   $(document).ready(function() {
     var Path, Rectangle, bridge, canvas;
     Path = paper.Path, Rectangle = paper.Rectangle;
@@ -10,11 +12,14 @@
     window.gCurrDevice = null;
     createHtml();
     canvas = document.getElementById('floor-plan');
+    canvas.width = 700;
     paper.setup(canvas);
     createFloor();
     createDevices();
     setupMouseDownEvents();
     paper.view.draw();
+    canvas.width = 620;
+    canvas.height = 500;
     paper.view.onFrame = function() {
       var device, _i, _len, _results;
       _results = [];
@@ -29,6 +34,9 @@
       return _results;
     };
     selectDevice(gDevices[0]);
+    setTimeout((function() {
+      return selectDevice(gDevices[0]);
+    }), 2000);
     bridge = new Bridge({
       apiKey: "245b536642b8bbe7"
     });
@@ -42,6 +50,12 @@
           for (_i = 0, _len = gDevices.length; _i < _len; _i++) {
             device = gDevices[_i];
             if (device.remoteId === parseInt(id)) {
+              if (state !== device.state) {
+                device.updateState();
+              }
+              if (gCurrDevice.remoteId === parseInt(id)) {
+                device.updateDetailPanel();
+              }
               _results.push(device.state = state);
             } else {
               _results.push(void 0);
@@ -53,47 +67,73 @@
     });
   });
 
-  SERVER_IP = "192.168.1.179:8080";
-
   createHtml = function() {
     var htmlStr;
     htmlStr = thermos.render(function() {
-      this.h1('Electrify.js');
       return this.div("#content", function() {
         this.div('#bottom-panel', function() {
           this.span('#name-label', 'Mac');
-          this.span('#id-label', '5');
-          this.span('#state-label', 'ON');
-          this.input({
-            'type': 'button',
-            'value': 'toggle',
-            'id': 'toggle-btn'
+          return this.div(function() {
+            this.div(function() {
+              this.span('#id-label', '5');
+              return this.span('#state-label', 'ON');
+            });
+            this.div({
+              style: 'margin: auto;'
+            }, function() {
+              return this.img({
+                'id': 'detail-img',
+                'src': 'images/lamp.png'
+              });
+            });
+            this.div(function() {
+              return this.input({
+                'type': 'button',
+                'value': 'toggle',
+                'id': 'toggle-btn'
+              });
+            });
+            return this.div({
+              'style': 'border-top:1px solid black;margin-top: 30px; padding-top: 20px;'
+            }, function() {
+              this.span({
+                'id': 'scheduler-label',
+                'style': 'font-size:24px;font-weight:bold;padding-bottom:20px;display:block;'
+              }, 'Schedule it!');
+              return this.div(function() {
+                this.div({
+                  'style': 'float:right;margin-bottom: 10px;'
+                }, function() {
+                  this.input({
+                    'type': 'text',
+                    'value': '12',
+                    'id': 'time-val'
+                  });
+                  return this.span('seconds');
+                });
+                return this.div({
+                  'style': 'float:right;clear:both;'
+                }, function() {
+                  this.div(function() {
+                    this.input({
+                      'type': 'checkbox',
+                      'value': 'Repeat',
+                      'id': 'repeat-btn'
+                    });
+                    return this.span('Repeat');
+                  });
+                  return this.input({
+                    'type': 'button',
+                    'value': 'Schedule',
+                    'id': 'schedule-btn'
+                  });
+                });
+              });
+            });
           });
-          this.img({
-            'id': 'detail-img',
-            'src': 'images/lamp.png'
-          });
-          this.input({
-            'type': 'text',
-            'value': '12',
-            'id': 'time-val'
-          });
-          this.span('seconds');
-          this.input({
-            'type': 'button',
-            'value': 'Schedule',
-            'id': 'schedule-btn'
-          });
-          this.input({
-            'type': 'checkbox',
-            'value': 'Repeat',
-            'id': 'repeat-btn'
-          });
-          return this.span('Repeat');
         });
         return this.canvas({
-          'id': 'floor-plan',
-          'resize': ''
+          'id': 'floor-plan'
         });
       });
     });
@@ -133,7 +173,7 @@
   };
 
   createFloor = function() {
-    var myPath, room1, room2, room3, room4;
+    var myPath, room1, room2, room3;
     myPath = new paper.Path();
     myPath.strokeColor = 'black';
     myPath.add(new paper.Point(10, 90));
@@ -144,24 +184,22 @@
     myPath.add(new paper.Point(300, 90));
     myPath.add(new paper.Point(400, 90));
     myPath.add(new paper.Point(450, 90));
-    myPath.add(new paper.Point(800, 90));
-    myPath.add(new paper.Point(800, 390));
+    myPath.add(new paper.Point(600, 90));
+    myPath.add(new paper.Point(600, 390));
     myPath.add(new paper.Point(10, 390));
     myPath.closed = true;
     room1 = new paper.Path.Rectangle([10, 90], [190, 140]);
     room2 = new paper.Path.Rectangle([10, 230], [190, 160]);
-    room3 = new paper.Path.Rectangle([400, 230], [190, 160]);
-    room4 = new paper.Path.Rectangle([590, 230], [210, 160]);
+    room3 = new paper.Path.Rectangle([410, 230], [190, 160]);
     room1.strokeColor = 'black';
     room1.fillColor = '#cccccc';
     room2.strokeColor = 'black';
-    room3.strokeColor = 'black';
-    return room4.strokeColor = 'black';
+    return room3.strokeColor = 'black';
   };
 
   createDevices = function() {
     var circleInfo, info;
-    circleInfo = [[[110, 300], 1, "Light"], [[300, 200], 2, "Toaster"], [[700, 310], 3, "Speakers"]];
+    circleInfo = [[[110, 300], 1, "Light"], [[300, 200], 2, "Refrigerator"], [[480, 310], 3, "Speakers"]];
     return window.gDevices = (function() {
       var _i, _len, _results;
       _results = [];
@@ -209,6 +247,12 @@
       $('#name-label').text(this.name);
       $('#type-label').text('Computer');
       $('#state-label').text((this.state ? 'ON' : 'OFF'));
+      d(this.state);
+      if (this.state) {
+        $('#state-label').css('backgroundColor', '#66FF66');
+      } else {
+        $('#state-label').css('backgroundColor', '#DDD');
+      }
       return $('#detail-img').attr('src', 'images/' + this.name.toLowerCase() + '.png');
     };
 
@@ -219,6 +263,14 @@
 
     Device.prototype.deselect = function() {
       return this.ui.strokeColor = "blue";
+    };
+
+    Device.prototype.updateState = function() {
+      if (this.state) {
+        return this.ui.fillColor = "#001e5d";
+      } else {
+        return this.ui.fillColor = "#DDD";
+      }
     };
 
     return Device;
