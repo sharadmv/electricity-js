@@ -70,6 +70,9 @@ $(function() {
   function pushRealTimePoints() {
     pointsCount++;
     for(var i = 0; i < 3; i++) {
+      if (i == 1) {
+        return;
+      }
       realTimeChart.series[i].addPoint(lastPoint[i], true, pointsCount>20);
     }
   }
@@ -79,7 +82,6 @@ $(function() {
   var spent = 0;
   function updateSpent() {
     spent += cost / 60 / 60;
-    console.log(cost);
     $("#spent").html(spent.toFixed(6));
   }
 
@@ -89,15 +91,15 @@ $(function() {
       daily: {
         axis: ['Sun', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat'],
         data: [
-          [3, 4, 5, 5, 4, 4, 5],
-          [2, 3, 4, 5, 2, 4, 4]
+          [3.6, 4, 4.5, 5.1, 3.5, 3.7, 5],
+          [2.8, 3, 4.2, 5, 2.5, 4, 4]
         ]
       },
       hourly: {
         axis: ["1am", "2am", "3am", "4am", "5am", "6am", "7am", "8am", "9am", "10am", "11am", "12pm", "1pm", "2pm", "3pm", "4pm", "5pm", "6pm", "7pm", "8pm", "9pm", "10pm", "11pm", "12am"],
         data: [
-          [3, 6, 1, 4, 2, 6, 2, 4, 3, 4, 5],
-          [1, 2, 3, 4, 5, 2, 3, 9, 3, 1, 6]
+          [4, 3.5, 3.6, 3.7, 3.6, 3.5, 3, 3.4, 3.6, 4, 4.5],
+          [3, 2.5, 3.2, 3.4, 3.5, 3.6, 3.7, 3.5, 3.2, 3, 2.7]
         ]
       }
     }
