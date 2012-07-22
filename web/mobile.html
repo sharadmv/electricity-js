@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>Fire</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+<script type="text/javascript" src="external/jquery.min.js"></script>
+<link href="css/mobile.css" rel="stylesheet" type="text/css" media="all" />
+<script>
+	$(document).ready(function(){
+		$("#on-btn-1").click(function(){
+			$.post('http://192.168.1.179:8080/api/1', {'method':'toggle'}, function(data){	
+			return false;
+			});
+		});
+		
+		$("#on-btn-2").click(function(){
+			$.post('http://192.168.1.179:8080/api/2', {'method':'toggle'}, function(data){	
+			return false;
+			});
+		});
+		
+		$("#on-btn-3").click(function(){
+			$.post('http://192.168.1.179:8080/api/3', {'method':'toggle'}, function(data){	
+			return false;
+			});
+		});
+	});
+</script>
+</head>
+<body>
+    <div class="header">
+        <h1>Electrify</h1>
+    </div>
+ </div>   
+
+<div class="dow"><ul>
+	<li><a id="on-btn-1" href="javascript:void(0)">Toggle 1</a></li>
+	<li><a id="on-btn-2" href="javascript:void(0)">Toggle 2</a></li>
+	<li><a id="on-btn-3" href="javascript:void(0)">Toggle 3</a></li>
+</ul></div>    
+
+<div class="footer">
+	<div class="copyright">
+		<p>Design by <a href="http://w3layouts.com">W3Layouts</a></p>
+    </div>
+</div>
+</body>
+</html>
