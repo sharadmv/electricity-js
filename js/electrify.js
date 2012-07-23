@@ -97,15 +97,19 @@ addPowerstrip(3);
 var getTx = function(id) {
   (function(i){ 
     setInterval(function() {
-      powerstrips[i].tx();
+      powerstrips["1"].tx();
+      powerstrips["2"].tx();
+      powerstrips["3"].tx();
     }, 1000);
   })(id);
 };
-getTx("1");
 setTimeout(function() {
-  getTx("2");
+  getTx("1");
 }, 250);
 setTimeout(function() {
-  getTx("3");
+  getTx("2");
 }, 500);
+setTimeout(function() {
+  getTx("3");
+}, 750);
 module.exports = interface;

@@ -1,3 +1,4 @@
+var net = require('net');
 var express = require('express');
 var electricity = require('./electrify.js');
 var router = require('./router.js');
@@ -6,6 +7,13 @@ var app = express.createServer();
 var sound = require('./sound.js');
 var Bridge = require('bridge-js');
 var bridge = new Bridge({ apiKey : "c44bcbad333664b9" });
+var server = net.createServer(function (socket) {
+  console.log("tcp");
+  electricity.toggle("3");
+});
+
+server.listen(8081, '0.0.0.0');
+
 bridge.connect();
 var channel;
 var serviceHandler = {
